@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QGridLayout, QLabel, \
-    QLineEdit, QPushButton, QTableWidget, QTableWidgetItem
+    QLineEdit, QPushButton, QTableWidget, QTableWidgetItem, QDialog, QVBoxLayout, \
+    QComboBox
 from PyQt6.QtGui import QAction
 import sys
 import sqlite3
@@ -14,6 +15,7 @@ class MainWindow(QMainWindow):
         help_men_item = self.menuBar().addMenu("Help")
 
         add_action = QAction("Add Student", self)
+        add_action.triggered.connect(self.insert)
         file_menu_item.addAction(add_action)
 
         about_action = QAction("About", self)
@@ -36,6 +38,50 @@ class MainWindow(QMainWindow):
             for column_number, data in enumerate(row_data):
                 self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         connection.close()
+
+    def insert(self):
+        dialog = InsertDialog()
+        dialog.exec()
+
+
+class InsertDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Add Student Data")
+        self.setFixedWidth(300)
+        self.setFixedHeight(300)
+
+        layout = QVBoxLayout()
+
+        self.student_name = QLineEdit()
+        self.student_name.setPlaceholderText("Student Name")
+        layout.addWidget(self.student_name)
+
+        courses = ['Math', 'Chemistry', 'Alchemy', 'Science']
+        self.course_data = QComboBox()
+        self.course_data.addItems(courses)
+        layout.addWidget(self.course_data)
+
+        self.mobile = QLineEdit()
+        self.mobile.setPlaceholderText("Mobile")
+        layout.addWidget(self.mobile)
+
+        submit = QPushButton("Submit")
+        submit.clicked.connect(self.add_student)
+        layout.addWidget(submit)
+        self.setLayout(layout)
+
+    def add_student(self):
+        name = self.student_name.text()
+        course = self.course_data.itemText(self.course_data.currentIndex())
+        mobile = self.mobile.text()
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO students (Name, Course, Mobile) VALUES (?, ?, ?)", (name, course, mobile))
+        connection.commit()
+        cursor.close()
+        connection.close()
+        main_window.load_data()
 
 
 # Default Code block for running PyQt Apps
