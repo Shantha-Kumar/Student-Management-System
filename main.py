@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QGridLayout, QLabel, \
-    QLineEdit, QPushButton
+    QLineEdit, QPushButton, QTableWidget
 from PyQt6.QtGui import QAction
 import sys
 
@@ -17,6 +17,14 @@ class MainWindow(QMainWindow):
 
         about_action = QAction("About", self)
         help_men_item.addAction(about_action)
+
+        self.table = QTableWidget()
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(("Id", "Name", "Course", "Mobile"))
+        self.setCentralWidget(self.table)
+
+        def load_data(self):
+            pass
 
 
 # Default Code block for running PyQt Apps
