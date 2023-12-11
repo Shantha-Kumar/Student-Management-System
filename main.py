@@ -34,7 +34,6 @@ class MainWindow(QMainWindow):
         self.table.verticalHeader().setVisible(False)
         self.setCentralWidget(self.table)
 
-
         toolbar = QToolBar()
         toolbar.setMovable(True)
         self.addToolBar(toolbar)
@@ -95,9 +94,47 @@ class EditDialog(QDialog):
         self.setWindowTitle("Edit Student Data")
         self.setFixedWidth(300)
         self.setFixedHeight(300)
-        layout = QVBoxLayout
 
+        layout = QVBoxLayout()
+
+        index = main_window.table.currentRow()
+        student_name = main_window.table.item(index, 1).text()
+        self.id = main_window.table.item(index, 0).text()
+
+        self.student_name = QLineEdit(student_name)
+        self.student_name.setPlaceholderText("Student Name")
+        layout.addWidget(self.student_name)
+
+        current_course = main_window.table.item(index, 2).text()
+        courses = ['Math', 'Chemistry', 'Alchemy', 'Physics']
+        self.course_data = QComboBox()
+        self.course_data.addItems(courses)
+        self.course_data.setCurrentText(current_course)
+        layout.addWidget(self.course_data)
+
+        mobile = main_window.table.item(index, 3).text()
+        self.mobile = QLineEdit(mobile)
+        self.mobile.setPlaceholderText("Mobile")
+        layout.addWidget(self.mobile)
+
+        submit = QPushButton("Update")
+        submit.clicked.connect(self.update_record)
+        layout.addWidget(submit)
         self.setLayout(layout)
+
+    def update_record(self):
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        cursor.execute("UPDATE students SET name=? , course=?,mobile=? WHERE id=?",
+                       (self.student_name.text(),
+                        self.course_data.itemText(self.course_data.currentIndex()),
+                        self.mobile.text(), self.id))
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        # To Refresh the Table
+        main_window.load_data()
 
 
 class DeleteDialog(QDialog):
